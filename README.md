@@ -98,6 +98,12 @@ Test Files  1 passed (1)
 Tests       15 passed (15)
 ```
 
+
+## Screenshots
+<img width="1510" height="939" alt="image" src="https://github.com/user-attachments/assets/ce9c9038-b420-45c0-9203-7635d13e1d96" />
+<img width="1375" height="929" alt="image" src="https://github.com/user-attachments/assets/505bfd89-046e-4938-8ba2-05c99f00b982" />
+
+
 ## CI/CD
 
 The GitHub Actions pipeline (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request:
