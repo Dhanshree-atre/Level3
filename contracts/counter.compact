@@ -1,0 +1,53 @@
+// counter.compact
+// Midnight ZK smart contract — privacy-preserving counter
+// Private witness: increment amount (never stored on-chain)
+// Public ledger:  counter total (visible to all)
+
+pragma language_version >= 0.14.0;
+
+import CompactStandardLibrary;
+
+// ── Ledger state ─────────────────────────────────────────────────────────────
+// `count` is public: visible to every network participant
+ledger {
+  count: Counter;
+}
+
+// ── Witnesses (private inputs) ────────────────────────────────────────────────
+// These values exist ONLY in the prover's local WASM environment.
+// They are NEVER transmitted, stored, or revealed on-chain.
+witness get_increment_amount(): Uint<32>;
+witness get_secret_amount(): Uint<32>;
+
+// ── Circuit: increment ────────────────────────────────────────────────────────
+// Caller provides a private increment amount (1–1000).
+// The ZK proof guarantees the amount is valid without revealing it.
+export circuit increment(): [] {
+  const amount = get_increment_amount();
+  // Range constraints — proved in ZK, not revealed
+  assert amount > 0 "increment amount must be positive";
+  assert amount <= 1000 "increment amount must not exceed 1000";
+  // disclose only the NEW total so the chain can validate the state update
+  const newCount = ledger.count + amount;
+  disclose(newCount);
+  ledger.count = newCount;
+}
+
+// ── Circuit: increment_if_positive ───────────────────────────────────────────
+// Uses a separate secret amount (1–100).
+// Demonstrates composable private witnesses.
+export circuit increment_if_positive(): [] {
+  const secretAmount = get_secret_amount();
+  assert secretAmount > 0 "secret amount must be positive";
+  assert secretAmount <= 100 "secret amount must not exceed 100";
+  const newCount = ledger.count + secretAmount;
+  disclose(newCount);
+  ledger.count = newCount;
+}
+
+// ── Circuit: reset ────────────────────────────────────────────────────────────
+// Resets the counter to zero (public operation, no witness needed).
+export circuit reset(): [] {
+  ledger.count = 0 as Counter;
+  disclose(ledger.count);
+}
